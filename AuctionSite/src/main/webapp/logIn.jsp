@@ -5,6 +5,9 @@
 <%@ page import="javax.servlet.http.*,javax.servlet.*"%>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 
+
+<!-- This page is used to check if a user with the given credentials exists, if they do
+	 then they will be logged in. Otherwise an error we will be reported. -->
 <html>
 
 	<head>
@@ -35,9 +38,11 @@
 			
 			if(!rs.next()){
 				out.println("Username or password is incorrect, try again");
+				response.sendRedirect("LogInPage.jsp");
 			}
 			else{
-				out.println("Log In Successful");
+				session.setAttribute("username",usernameEntered);
+				response.sendRedirect("Home.jsp");
 			}
 			
 			
