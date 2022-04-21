@@ -33,45 +33,21 @@
 				<li><a href="./Home.jsp">Home</a></li>
 				<li><a href="./mySales.jsp">My Sales</a></li>
 				<li><a href="./myBids.jsp">My Bids</a></li>
-				<li><a href="./customerServiceTab.jsp">Customer Support</a><li>
-				<li><a href="./accountSettings.jsp">Account Settings</a></li>
+				<li><a href="./accountSettings">Account Settings</a></li>
+
 			</ul>
 		</div>
 		
 		<br>
 		
 		
-		
-		
-		
-		
-		
-			<% 
- 			// If the user tries to login, but the username/password do not exist then return this error.
-			String createAuctionStatus = (String) session.getAttribute("createAuctionStatus");
-			String makeBidStatus = (String) session.getAttribute("makeBidStatus");
-			if(createAuctionStatus.contains("Auction successfully created, auction sale number: ") || createAuctionStatus== "Error auction not created"){
-				%> <h2><%out.println(createAuctionStatus);%></h2><%
-				session.setAttribute("createAuctionStatus","");
-			} 
-		
- 			if(makeBidStatus =="Bid was successfully placed" || makeBidStatus== "Bid could not be placed, please try again" || makeBidStatus == "Bid not placed, sale has already closed."
- 					|| makeBidStatus == "Sale does not exist"|| makeBidStatus == "You have already placed a bid on the item, the auto bidder will make any further bids for you"){
-				%> <h2><%out.println(makeBidStatus);%></h2><%
-				session.setAttribute("makeBidStatus","");				
-			}
- 		%>
-		<form id="RefreshSales"  method="post" action="checkAuctions.jsp">
-			<input type="submit" value="RefreshSales">
-		</form>
-		
 		<div class="container">
-				
+		
 			<h2>View the Current Sales</h2>
 		
 			<form id="filteredSearch" method="post" action="searchFilter.jsp">
-				<label for="searchCarName">Car Name:</label>
-				<input type="text" name="searchCarName">
+				<label for="searchText">Search: </label>
+				<input type="text" name="searchText">
 				<br>
 				<br>
 				<label for="searchVehicleType">Vehicle Type:</label>
@@ -120,7 +96,9 @@
 	
 		</div>
 		
-	
+		
+		
+		
 		
 		
 		
@@ -154,7 +132,6 @@
 				
 				
 				<label for="manufacturer">Manufacturer: </label>
-	
 				<input list="manufacturer" name="manufacturer">
 				<datalist id="manufacturer">
 					<option value="Toyota"></option>
@@ -164,11 +141,8 @@
 				<br>
 				<br>
 				
-				<label for="carName">Car Name:</label>
-				<input type="text" name="carName">
 				
-				<br>
-				<br>
+				
 				<label for="manufacturedYear">Manufactured Year: </label>
 				<input type="text" name="manufacturedYear">			
 				<br>
@@ -217,38 +191,7 @@
 				<br>
 				<input type="submit" value="Create Sale!" class="submitButton">
 			</form>
-			
 		
-			<div class="container">
-		
-					<h2>Make a bid</h2>
-				
-					<form id="makeBid" method="post" action="makeBid.jsp">
-			
-			
-						<label for="bidSaleNumber">Sale Number:</label>
-						<input type="text" name="bidSaleNumber">
-						<br>
-						<br>
-						<label for="initBidAmount">Initial Bid Amount:</label>
-						<input type="text" name="initBidAmount">				
-						<br>
-						<br>
-						<label for="maxBidAmount">Max bid amount:</label>
-						<input type="text" name="maxBidAmount">						
-						<br>
-						<br>
-						<label for="bidIncr">Bid increment:</label>
-						<input type="text" name="bidIncr">			
-						<br>
-						<br>
-						<input type="submit" value="Make Bid" class="submitButton">
-					</form>
-					
-					<br>
-		
-	
-			</div>	
 		
 		</div>
 

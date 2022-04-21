@@ -17,6 +17,32 @@
 
 		<h1> Welcome to our Sale Site!</h1>
 		<br>
+		
+		
+		<% 
+			// If the user tries to login, but the username/password do not exist then return this error.
+			String logInResult = (String) session.getAttribute("loginResult");
+			String registerResult = (String) session.getAttribute("registerResult");
+			if(logInResult == "Username or password is incorrect, try again."){
+				%> <h2>Username or password is incorrect, try again</h2><%
+				session.setAttribute("logInResult","");
+				session.setAttribute("registerResult","");
+			}
+			
+			else if(registerResult == "Username in use, pick another username" || registerResult == "Email already in use. Use a different email."	
+					|| registerResult=="Username and email already belong to an account." || registerResult == "Registration successful, please log in"){
+				
+				
+				%> <h2><%out.println(registerResult); %></h2><%
+				session.setAttribute("logInResult","");
+				session.setAttribute("registerResult","");
+			}
+			
+			session.setAttribute("makeBidStatus","");
+			session.setAttribute("createAuctionStatus","");
+		
+		%>
+		
 		<div id="loginBox">
 			<h2>Please Log In</h2>
 			<form id="login" autocomplete="off" method="get" action="logIn.jsp">

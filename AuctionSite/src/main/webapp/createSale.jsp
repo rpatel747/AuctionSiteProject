@@ -24,70 +24,92 @@
 			Connection con = db.getConnection();
 			
 
-			
-			
-			
-			String[] vehicleType = request.getParameterValues("vehicleType");
-			String manufacturer = request.getParameter("manufacturer");
+			String customerEmail = (String) session.getAttribute("customerEmail");
+			out.println(customerEmail);
 			String manufacturedYear = request.getParameter("manufacturedYear");
-			String[] color = request.getParameterValues("color");
+			String carName = request.getParameter("carName");
+			String manufacturer = request.getParameter("manufacturer");
 			String mileage = request.getParameter("mileage");
-			String price = request.getParameter("price");
-			String validBidIncrement = request.getParameter("validBidIncrement");
+			String currentPrice = request.getParameter("price");
 			String trim = request.getParameter("trim");
+			String[] vehicleType = request.getParameterValues("vehicleType");
+			String[] color = request.getParameterValues("color");
+			
+			String endDateTime = request.getParameter("endDateTime");
+			String saleEndDateTime = (endDateTime.replace('T',' ')) + ":00";
+			
+			String validBidIncrement = request.getParameter("validBidIncrement");
+			String minimumPrice = currentPrice;
+			
+		
+			
+	
 			
 			
 			
 			
-			String saleEndDateTime = request.getParameter("endDateTime");
-			String sEDT = "";
-			for(int i =0;i<saleEndDateTime.length();i++){
-				if((saleEndDateTime.charAt(i)) == 'T'){
-					char space = ' ';
-					sEDT = sEDT + space;
-				}
-				else{
-					sEDT = sEDT + saleEndDateTime.charAt(i);
-				}
-				
-			}
 			
-			String ss = ":00";
-			sEDT = sEDT + ss;
 			
-			String insert = "INSERT INTO sale(saleNumber,manufactureYear,manufacturer,price,trim,subcategory,color,end,validBidIncr,minimumPrice) VALUES(?,?,?,?,?,?,?,?,?,?)";
+			// Take the given information about the sale, and insert it into the database to register the sale
+
+			String insert = "INSERT INTO sale(saleNumber,carName,manufactureYear,manufacturer,mileage,currentPrice,trim,vehicleType,color,end,validBidIncr,minimumPrice) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)";
 	
 			PreparedStatement ps = con.prepareStatement(insert);
 			ps.setInt(1,0);
-			ps.setString(2,manufacturedYear);
+			ps.setString(2,carName);
 			ps.setInt(3,Integer.parseInt(manufacturedYear));
-			ps.setFloat(4,Float.parseFloat(price));
-			ps.setString(5,trim);
-			ps.setString(6,vehicleType[0]);
-			ps.setString(7,color[0]);
-			ps.setTimestamp(8,java.sql.Timestamp.valueOf(sEDT));
-			ps.setFloat(9,Float.parseFloat(validBidIncrement));
-			ps.setFloat(10,Float.parseFloat(price));
+			ps.setString(4,manufacturer);
+			ps.setInt(5,Integer.parseInt(mileage));
+			ps.setFloat(6,Float.parseFloat(currentPrice));
+			ps.setString(7,trim);
+			ps.setString(8,vehicleType[0]);
+			ps.setString(9,color[0]);
+			ps.setTimestamp(10,java.sql.Timestamp.valueOf(saleEndDateTime));
+			ps.setFloat(11,Float.parseFloat(validBidIncrement));
+			ps.setFloat(12,Float.parseFloat(minimumPrice));
+			
+			
+			ps.executeUpdate(); 
 			
 			
 			
-			ps.executeUpdate();
 			
+			// Query the database to get the saleNumber for the sale from above, and add it to the insert
+			
+ 			PreparedStatement stmt = con.prepareStatement("SELECT LAST_INSERT_ID()");
+			ResultSet rs= stmt.executeQuery();
+			int currentSaleNumber = 0;
+			if(rs.next()){
+				currentSaleNumber = rs.getInt(1);
+			}
+			
+			String insert2 = "INSERT INTO sells(email,saleNumber,saleStatus,soldPrice) VALUES(?,?,?,?)";
+			
+			PreparedStatement ps2 = con.prepareStatement(insert2);
+			ps2.setString(1,customerEmail);
+			ps2.setInt(2,currentSaleNumber);
+			ps2.setInt(3,0);
+			ps2.setInt(4,0);
+			ps2.executeUpdate(); 
 
-			con.close();
 			
+			
+			session.setAttribute("createAuctionStatus","Auction successfully created, auction sale number: " + currentSaleNumber);
+			con.close();
+			response.sendRedirect("Home.jsp");	
 		
 		
 		}
 		
 		catch (Exception ex){
-			out.print(ex);
-			out.print("Query failed :()");
+			out.println(ex);
+			session.setAttribute("createAuctionStatus","Error auction not created");
+			//response.sendRedirect("Home.jsp");	
 		}
 
 	%>
 	
-	
+		<h1>Your sale was created successfully!</h1>
 	
 	
 	</body>

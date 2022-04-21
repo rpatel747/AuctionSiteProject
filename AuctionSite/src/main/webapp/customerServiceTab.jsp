@@ -33,7 +33,7 @@
 				<li><a href="./Home.jsp">Home</a></li>
 				<li><a href="./mySales.jsp">My Sales</a></li>
 				<li><a href="./myBids.jsp">My Bids</a></li>
-				<li><a href="./customerServiceTab.jsp">Customer Support</a><li>
+				<li><a href="./messages.jsp">Customer Support</a><li>
 				<li><a href="./accountSettings.jsp">Account Settings</a></li>
 			</ul>
 		</div>
