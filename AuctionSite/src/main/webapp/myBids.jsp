@@ -175,7 +175,7 @@
 					<tr >
 						<td><%= rs.getInt(2) %></td>
 						<td><%= rs.getFloat(3) %></td>
-						<td><%= rs.getString(6) %></td>			
+						<td><%= rs.getString(4) %></td>			
 					</tr>
 					
 					

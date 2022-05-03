@@ -25,7 +25,7 @@
 			
 
 			String customerEmail = (String) session.getAttribute("customerEmail");
-			out.println(customerEmail);
+			
 			String manufacturedYear = request.getParameter("manufacturedYear");
 			String carName = request.getParameter("carName");
 			String manufacturer = request.getParameter("manufacturer");
@@ -90,7 +90,76 @@
 			ps2.setInt(2,currentSaleNumber);
 			ps2.setInt(3,0);
 			ps2.setInt(4,0);
-			ps2.executeUpdate(); 
+			ps2.executeUpdate();
+			
+			
+			PreparedStatement checkAlerts = con.prepareStatement("SELECT * FROM alerts WHERE setBy=1");
+			ResultSet checkAlertsResult = checkAlerts.executeQuery();
+			
+			if(checkAlertsResult.next()){
+				
+				
+				
+				do{
+					
+					int alertMatchesSale = 1;
+					int alertID = checkAlertsResult.getInt(1);
+					String[] saleParameters = new String[11];
+					saleParameters[3] = carName; // Car name
+					saleParameters[4] = vehicleType[0]; // Vehicle Type
+					saleParameters[5] = manufacturer; // Manufacturer
+					saleParameters[6] = manufacturedYear; // Manufactured Year
+					saleParameters[7] = color[0]; // Color
+					saleParameters[8] = mileage; // Mileage
+					saleParameters[9] = trim; // Trim
+					
+					for(int i = 3;i<10;i++){
+						
+						if(checkAlertsResult.getString(i).equals("null")){
+							out.println(i);
+							continue;
+						}
+						 
+						if(!saleParameters[i].equals(checkAlertsResult.getString(i))){
+							out.println("DOES NOT MATCH");
+							alertMatchesSale = 0;
+						}
+						
+						
+					}
+					
+					if(alertMatchesSale == 1){
+
+						PreparedStatement updateAlertsShowAlert = con.prepareStatement("UPDATE alerts SET showAlert=? WHERE alertID=?");
+						updateAlertsShowAlert.setInt(1,1);
+						updateAlertsShowAlert.setInt(2,alertID);
+						updateAlertsShowAlert.executeUpdate();
+						
+						
+						PreparedStatement updateAlertsSetBy = con.prepareStatement("UPDATE alerts SET setBy=? WHERE alertID=?");
+						updateAlertsSetBy.setInt(1,3);
+						updateAlertsSetBy.setInt(2,alertID);
+						updateAlertsSetBy.executeUpdate();
+						
+						
+					}
+					
+					
+					
+				} while(checkAlertsResult.next());
+				
+				
+				
+				
+				
+				
+				
+				
+			}
+			
+			
+			
+			
 
 			
 			

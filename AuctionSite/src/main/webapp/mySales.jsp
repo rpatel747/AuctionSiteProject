@@ -143,8 +143,145 @@
 
 	%>
 	
-	<h1>My Wins</h1>
-	<h1>My Auction History</h1>
+	<%
+		try {
+			
+			ApplicationDB db = new ApplicationDB();
+			Connection con = db.getConnection();
+			
+			String customerEmail = (String) session.getAttribute("customerEmail");
+			
+			PreparedStatement activeSales = con.prepareStatement("SELECT * FROM sale WHERE status=? AND saleNumber IN (SELECT saleNumber FROM sells WHERE email=?)");
+			activeSales.setInt(1,1);
+			activeSales.setString(2,customerEmail);
+			ResultSet rs = activeSales.executeQuery();		
+		
+
+		
+			if(!rs.next()){
+				out.println("There are no sales currently.");
+				
+			}
+			else{
+				
+
+				
+				%>
+				
+				<h1>Previous Auctions</h1>
+				
+				
+				<table>
+					<tr>
+						<th>Sale Number</th>
+						<th>Car Name</th>
+						<th>Manufactured Year</th>
+						<th>Manufacturer</th>
+						<th>Mileage</th>
+						<th>Current Price</th>
+						<th>Trim</th>
+						<th>Vehicle Type</th>
+						<th>Color</th>
+						<th>Sale Finish</th>
+						<th>Minimum Price</th>
+						<td>Highest Bid</td>
+						<th>Status</th>
+					</tr>
+				<%
+				do{
+
+					PreparedStatement getMaxBid = con.prepareStatement("SELECT MAX(currentBid) FROM bids WHERE saleNumber=?");
+				  	getMaxBid.setInt(1,rs.getInt(1));
+					ResultSet rs2= getMaxBid.executeQuery();
+					
+					PreparedStatement getSaleStatus = con.prepareStatement("SELECT * FROM won WHERE email=? and saleNumber=?");
+					getSaleStatus.setString(1,customerEmail);
+					getSaleStatus.setInt(2,rs.getInt(1));
+					ResultSet rs3= getSaleStatus.executeQuery();
+					
+					
+					String soldStatus = "";
+					
+					if(rs3.next()){
+						soldStatus = "Sold";
+					}
+					else{
+						soldStatus = "Not Sold";
+					}
+					
+					if(!rs2.next()){
+						out.println("ERROR");
+					}
+					
+					%>
+					
+					
+					<tr >
+						<td><%= rs.getString(1) %></td>
+						<td><%= rs.getString(2) %></td>
+						<td><%= rs.getString(3) %></td>
+						<td><%= rs.getString(4) %></td>
+						<td>$<%= rs.getString(5) %></td>
+						<td><%= rs.getString(6) %></td>
+						<td><%= rs.getString(7) %></td>
+						<td><%= rs.getString(8) %></td>
+						<td><%= rs.getString(9) %></td>
+						<td><%= rs.getString(10) %></td>
+						<td><%= rs.getString(12) %></td>
+						<td>$<%= rs2.getFloat(1) %></td>
+						<td>Closed / <%out.println(soldStatus); %></td>		
+					</tr>
+					
+					
+					
+					
+					
+				<%}while(rs.next());
+				
+				%> </table><%
+				
+				
+				con.close();
+				
+			
+				
+				
+				
+				
+				
+				
+				
+				
+			}
+		
+			%>	
+			
+			<form id="backToHome"  method="post" action="Home.jsp">
+				<input type="submit" value="Back to Home">
+			</form>				
+				
+			<%			
+			
+			
+			
+			
+			
+			
+	
+		
+		
+		
+		}
+		
+		catch (Exception ex){
+			out.print(ex);
+			out.print("Query failed :()");
+		}
+
+	%>
+	
+	
+
 	
 	</body>
 

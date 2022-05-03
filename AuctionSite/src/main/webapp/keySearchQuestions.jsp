@@ -40,74 +40,8 @@
 		
 		<br>
 		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		<h2>Answering your questions, and providing a great customer experience is our top goal.</h2>
-		<h2>Before you send us a message, check out our FAQ for questions that customers have already asked us.</h2>
-		<form method="post" action="viewFAQ.jsp">
-			<input type="submit" value="Check FAQ">
-		</form>
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		<div id="myMessages">
-			
-			<h3>If you have any questions, or need to make any requests, then message our customer rep team.</h3>
-			<h3>Use the form below</h3>
-			
-			
-			<div id="createMessage">
-			
-				<h3>Send Question</h3>
-				<form method="post" action="sendQuestion.jsp">
-					<label for="messageTopic">Topic: </label>
-					<input list="messageTopic" name="messageTopic">
-					<datalist id="messageTopic">
-						<option value="Reset password"></option>
-						<option value="Remove Bid"></option>
-						<option value="Delete Auction"></option>
-						<option value="Change Account Information"></option>
-						<option value="General Information"></option>
-					</datalist>
-					<br>
-					<br>
-					<label for="userMessageContent">Tell Us More:</label>
-					<input type="text" name="userMessageContent">
-					<br>
-					<br>
-					<input type="submit" value="Send">
-				
-				</form>	
-			</div>
-		
-		
-			<br>
-			<br>
-			<div id="viewMyMessages">
-				<h3>In order to avoid sending duplicate questions, please check your previously send messages with their responses.</h3>
-				<h3>My Previous Messages</h3>
-				
-				<form method="Post" action="keySearchQuestions.jsp">
-					<h4>Try Searching by Key Words:</h4>
-					<input type="text" name="keyWordSearch">
-					<input type="submit" value="Search">
-				</form>
-				
+					
+
 				<%
 					try {
 						
@@ -116,10 +50,15 @@
 						
 						// Get the email for the customer to make query
 						String customerEmail = (String) session.getAttribute("customerEmail");
-					
+								
+						String keyWordSearch = (String) request.getParameter("keyWordSearch");
+						
+						%><h2>Keyword Search for: " <% out.println(keyWordSearch);%>"</h2><%		
+								
 						PreparedStatement stmt = con.prepareStatement("SELECT * FROM questions WHERE questionID IN (SELECT questionID FROM asksQuestion WHERE email=?)");
 						stmt.setString(1,customerEmail);
 						ResultSet rs= stmt.executeQuery();
+						
 						
 						
 						if(!rs.next()){
@@ -127,6 +66,8 @@
 							
 						}
 						else{
+							
+
 							
 							%>
 							
@@ -141,7 +82,25 @@
 							<%
 							do{
 								
+								String[] keywords = keyWordSearch.split("\\s+");
+								int numberOfKeywords = keywords.length;
+																
+								String combinedResult = " " + rs.getInt(1) + " " + rs.getString(2) + " " + rs.getString(3) + " " + rs.getString(4);
 								
+								boolean show = false;
+								
+								int i = 0;
+								while(i<numberOfKeywords){
+									if(combinedResult.contains(keywords[i]) == true){
+										show = true;
+									}
+									i++;
+									
+								}
+								
+								if(show == false){
+									continue;
+								}
 
 								
 								String status;

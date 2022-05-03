@@ -25,7 +25,7 @@
 	
 		<%
 		
-		//NEED TO MAKE GET THE DATE FOR EACH OF THE dates for the sales, right now it only checks the sale for the first date
+		
 		try {
 			
 			ApplicationDB db = new ApplicationDB();
@@ -84,6 +84,7 @@
 				  	getMaxBid.setInt(1,saleNumber);
 					ResultSet rs2= getMaxBid.executeQuery();
 					
+					
 				  	if(todaysDate.after(saleDate)){
 						
 							
@@ -118,7 +119,78 @@
 									PreparedStatement ps3 = con.prepareStatement(insert);
 									ps3.setInt(1,1);
 									ps3.setInt(2,saleNumber);
-									ps3.executeUpdate();							
+									ps3.executeUpdate();	
+									
+									// Alert the winner that they have won
+									
+									String alertMessage = "You have won Auction #" + saleNumber;
+									
+						 			PreparedStatement insertUserAlert = con.prepareStatement("INSERT INTO alerts(alertID,alertContent,carName,vehicleType,manufacturer,year,color,mileage,trim,showAlert,setBy,acknowledged) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)");
+									insertUserAlert.setInt(1,0);
+									insertUserAlert.setString(2,alertMessage);
+									insertUserAlert.setString(3,carName);
+									insertUserAlert.setString(4,vehicleType);
+									insertUserAlert.setString(5,manufacturer);
+									insertUserAlert.setString(6,String.valueOf(manufacturedYear));
+									insertUserAlert.setString(7,color);
+									insertUserAlert.setString(8,String.valueOf(mileage));
+									insertUserAlert.setString(9,trim);
+						 			insertUserAlert.setInt(10,1);
+									insertUserAlert.setInt(11,3);
+									insertUserAlert.setInt(12,0); 
+									insertUserAlert.executeUpdate();
+									
+									
+						 			PreparedStatement getAlertID = con.prepareStatement("SELECT LAST_INSERT_ID()");
+									ResultSet rs3= getAlertID.executeQuery();
+									int alertID = 0;
+									if(rs3.next()){
+										alertID = rs3.getInt(1);
+									}
+									
+									PreparedStatement updateCustomerHas = con.prepareStatement("INSERT INTO customerHasAlerts(alertID,email) VALUES(?,?)");
+									updateCustomerHas.setInt(1,alertID);
+									updateCustomerHas.setString(2,rs2.getString(1));
+									updateCustomerHas.executeUpdate();
+									
+
+									// Alert the seller that the auction has finished with a winner
+									
+									alertMessage = "Auction #" + saleNumber+ " has sold";
+						 			PreparedStatement insertSellerAlert = con.prepareStatement("INSERT INTO alerts(alertID,alertContent,carName,vehicleType,manufacturer,year,color,mileage,trim,showAlert,setBy,acknowledged) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)");
+						 			insertSellerAlert.setInt(1,0);
+						 			insertSellerAlert.setString(2,alertMessage);
+						 			insertSellerAlert.setString(3,carName);
+						 			insertSellerAlert.setString(4,vehicleType);
+						 			insertSellerAlert.setString(5,manufacturer);
+						 			insertSellerAlert.setString(6,String.valueOf(manufacturedYear));
+						 			insertSellerAlert.setString(7,color);
+						 			insertSellerAlert.setString(8,String.valueOf(mileage));
+						 			insertSellerAlert.setString(9,trim);
+						 			insertSellerAlert.setInt(10,1);
+						 			insertSellerAlert.setInt(11,3);
+						 			insertSellerAlert.setInt(12,0); 
+						 			insertSellerAlert.executeUpdate();
+						 			
+						 			PreparedStatement getSellerAlertID = con.prepareStatement("SELECT LAST_INSERT_ID()");
+									ResultSet rs4= getSellerAlertID.executeQuery();
+									alertID = 0;
+									if(rs4.next()){
+										alertID = rs4.getInt(1);
+									}
+									
+									PreparedStatement getSellerEmail = con.prepareStatement("SELECT email FROM sells WHERE saleNumber=?");
+									getSellerEmail.setInt(1,saleNumber);
+									ResultSet sellerEmail = getSellerEmail.executeQuery();
+									
+									if(sellerEmail.next()){
+										PreparedStatement updateSellerHas = con.prepareStatement("INSERT INTO customerHasAlerts(alertID,email) VALUES(?,?)");
+										updateCustomerHas.setInt(1,alertID);
+										updateCustomerHas.setString(2,sellerEmail.getString(1));
+										updateCustomerHas.executeUpdate();										
+									}
+									
+								
 								}
 							
 							}
@@ -126,25 +198,54 @@
 							
 							else{
 								
-								// The auction has ended, but there is not bid that is greater then the min price set by the user
-								// Need to extend the auction for more users to bid
-								// Get todays date, and add two more dates
-								Calendar calendar = Calendar.getInstance();
-								Date today = calendar.getTime();
-								calendar.add(Calendar.DAY_OF_YEAR,2);
-								Date tommorow = calendar.getTime();
+								// The auction date has finished but no one bet above the minimum reserve 
+								// Close the auction
 								
-								String extendedDate = sdf.format(tommorow);
+									// Update the sale so that its status is set to 1 (closed)
+									String insert = "UPDATE sale SET status=? WHERE saleNumber=?";
+									PreparedStatement ps3 = con.prepareStatement(insert);
+									ps3.setInt(1,1);
+									ps3.setInt(2,saleNumber);
+									ps3.executeUpdate();
+									
+									// Alert the seller that the item has not sold because the bids did not reach the minimum price
 								
-								// Update the database with the new end of auction date
-								String updateSaleEndTimeDate = "UPDATE sale SET end=? WHERE saleNumber=?";
-								PreparedStatement ps4 = con.prepareStatement(updateSaleEndTimeDate);
-								ps4.setTimestamp(1, java.sql.Timestamp.valueOf(extendedDate));
-								ps4.setInt(2,saleNumber);
-								ps4.executeUpdate();
+									String alertMessage = "Auction #"+saleNumber+" has not sold because no bids were above the minimum price";
+									
+						 			PreparedStatement insertUserAlert = con.prepareStatement("INSERT INTO alerts(alertID,alertContent,carName,vehicleType,manufacturer,year,color,mileage,trim,showAlert,setBy,acknowledged) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)");
+									insertUserAlert.setInt(1,0);
+									insertUserAlert.setString(2,alertMessage);
+									insertUserAlert.setString(3,carName);
+									insertUserAlert.setString(4,vehicleType);
+									insertUserAlert.setString(5,manufacturer);
+									insertUserAlert.setString(6,String.valueOf(manufacturedYear));
+									insertUserAlert.setString(7,color);
+									insertUserAlert.setString(8,String.valueOf(mileage));
+									insertUserAlert.setString(9,trim);
+						 			insertUserAlert.setInt(10,1);
+									insertUserAlert.setInt(11,3);
+									insertUserAlert.setInt(12,0); 
+									insertUserAlert.executeUpdate();
+									
+									
+						 			PreparedStatement getAlertID = con.prepareStatement("SELECT LAST_INSERT_ID()");
+									ResultSet rs3= getAlertID.executeQuery();
+									int alertID = 0;
+									if(rs3.next()){
+										alertID = rs3.getInt(1);
+									}
+									
+									PreparedStatement getSellerEmail = con.prepareStatement("SELECT email FROM sells WHERE saleNumber=?");
+									getSellerEmail.setInt(1,saleNumber);
+									ResultSet sellerEmail = getSellerEmail.executeQuery();	
+									
+									
+									PreparedStatement updateCustomerHas = con.prepareStatement("INSERT INTO customerHasAlerts(alertID,email) VALUES(?,?)");
+									updateCustomerHas.setInt(1,alertID);
+									updateCustomerHas.setString(2,sellerEmail.getString(1));
+									updateCustomerHas.executeUpdate();									
+									
 								
-								
-								//Alert the user that the date has been extended
 							}
 						}
 				  					  				  		
@@ -152,18 +253,70 @@
 			  	
 				  	else{
 				  		// Auction has not finished
-				  		// Check if there a bid greater then the min value for the sale has been placed
+				  		// Get all the users that are bidding, if they choose to auto bid then perform one round of auto biddings
 				  		
-				  		if(rs2.next()){
+
+						PreparedStatement getBids = con.prepareStatement("SELECT * FROM bids WHERE saleNumber=?");
+						getBids.setInt(1,saleNumber);
+						ResultSet currentBidsPlaced = getBids.executeQuery();
+				  		
+				  		if(currentBidsPlaced.next()){
+				  			// Get the current max bid, if the user has the current max bid then skip them 
+				  			// Otherwise get the current max bid, check if the bidder can make a a larger bid
+				  			// if they can then place the bid
 				  			
-				  			float currentMaxBid = rs2.getFloat(3);
+				  			do{
+				  				
+								PreparedStatement getMB = con.prepareStatement("SELECT * FROM bids WHERE saleNumber=? AND currentBid IN (SELECT MAX(currentBid) currentBid FROM bids)");
+								getMB.setInt(1,saleNumber);
+								ResultSet rs3= getMB.executeQuery();
+								
+								float currentMaxBid = 0;
+								if(rs3.next()){
+									currentMaxBid = rs3.getFloat(3);
+								}
+								
+								// Get the information about the bidders current bid and their email
+								float currentUserBid = currentBidsPlaced.getFloat(3);
+								String currentUserEmail = currentBidsPlaced.getString(1);
+								
+								if(currentUserBid == currentMaxBid){
+									continue;
+								}
+				  				
+								else{
+									
+									float currentUserMaxBidAmount = currentBidsPlaced.getFloat(4);
+									float nextValidBid = (currentMaxBid + validBidIncr);
+									if(currentUserMaxBidAmount >= nextValidBid){
+										
+										// The current bidder can increase their bid
+										// Update their bid with the larger bid
+										PreparedStatement updateBid = con.prepareStatement("UPDATE bids SET currentBid=? WHERE email=? AND saleNumber=?");
+										updateBid.setFloat(1,nextValidBid);
+										updateBid.setString(2,currentUserEmail);
+										updateBid.setInt(3,saleNumber);
+										updateBid.executeUpdate();
+										
+										// Update the bid history with the bid that was just placed
+							  			PreparedStatement createNewBidHistory = con.prepareStatement("INSERT INTO bidsHistory(email,saleNumber,currentBid,bidDateTime) VALUES(?,?,?,?)");
+							  			createNewBidHistory.setString(1,currentUserEmail);
+							  			createNewBidHistory.setInt(2,saleNumber);
+							  			createNewBidHistory.setFloat(3,nextValidBid);
+							  			createNewBidHistory.setTimestamp(4,java.sql.Timestamp.valueOf(todaysDateTime));
+							  			createNewBidHistory.executeUpdate();
+										
+									}
+									
+									
+								}
+				  				
+				  				
+				  				
+				  			}while(currentBidsPlaced.next());
 				  			
-				  			if(currentMaxBid >= minPrice){
-				  				// Alert the user that a bid has been placed that is greater then the min price
-				  			}
 				  			
 				  		}
-				  		
 				  		
 				  	}
 				
@@ -176,16 +329,9 @@
 				
 				
 			}
-			
-			else {
-				out.println("There are no sales to check currently.");
-			}
-		
+					
 			
 			con.close();
-			
-		
-			
 			response.sendRedirect("Home.jsp");		
 			
 			

@@ -23,22 +23,7 @@
 		
 		
 		
-			
-		  	//Compare Dates
-		  	
-/* 		  	Date todaysDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(date);
-		  	String beforeDate = "2001-05-05 01:01:01";
-		  	String afterDate = "2023-04-04 01:01:01";
-		  	Date dateBefore = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(afterDate);
-		  	if(todaysDate.after(dateBefore)){
-			  out.println("HAPPEND LATER");
-		  	}
-		  	else{
-			  out.println("Happend Before");
-		  	} */
-		  	
-		  	
-		  	
+
  		try {
 			
  			ApplicationDB db = new ApplicationDB();
@@ -51,83 +36,215 @@
 			// Get todays date:
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		  	String todaysDateTime = sdf.format(new Date());		
-			
+		  	Date todaysDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(todaysDateTime);
 		  	
-			int saleNumber = Integer.parseInt(request.getParameter("bidSaleNumber"));
-			String bidInitalAmount = (String) request.getParameter("initBidAmount");
-			String maxBidAmount =(String)(request.getParameter("maxBidAmount"));
-			String bidIncrement = (String)(request.getParameter("bidIncr"));
-			
-			// Check if the user has already placed a bid on sale in question
-			PreparedStatement checkBidHistory = con.prepareStatement("SELECT * FROM bids WHERE email=? AND saleNumber=?");
-			checkBidHistory.setString(1,customerEmail);
-			checkBidHistory.setInt(2,saleNumber);
-			ResultSet rs2= checkBidHistory.executeQuery();
-			
-			if(rs2.next()){
-				// User has already palced a bid on the item
-				// The auto bidder will make any further bids
-				// If they want to make any adjustments please contact customer support
-				session.setAttribute("makeBidStatus","You have already placed a bid on the item, the auto bidder will make any further bids for you");
-			}						
-			
-			
-			//Get the information about the sale, make sure that the sale is still open
-			PreparedStatement getSaleStatus = con.prepareStatement("SELECT * FROM sale WHERE saleNumber=?");
-			getSaleStatus.setInt(1,saleNumber);
-			ResultSet rs= getSaleStatus.executeQuery();
-		
-			
-			if(rs.next()){
-				
+		  	
+		  	
+		  	// Get the currentHighestBid for the sale, if there is not currentHighestBid then they must use a valid bid increment to bid
+		  	int saleNumber = Integer.parseInt(request.getParameter("bidSaleNumber"));
+		  			
+		  	// Query the database to get the information about the sale
+		  	PreparedStatement getAuctionInfo = con.prepareStatement("SELECT * FROM sale WHERE saleNumber=?");
+		  	getAuctionInfo.setInt(1,saleNumber);
+		  	ResultSet auctionInfo = getAuctionInfo.executeQuery();
+		  	
 
-				
-				int saleStatus = rs.getInt(13);
-				
-				if(saleStatus == 0){
-				
-					String insertIntoBids = "INSERT INTO bids(email,saleNumber,currentBid,maxBid,automaticBidIncrement) VALUES(?,?,?,?,?)";
-					PreparedStatement ps = con.prepareStatement(insertIntoBids);
-					ps.setString(1,customerEmail);
-					ps.setInt(2,saleNumber);
-					ps.setFloat(3,Float.parseFloat(bidInitalAmount));
-					ps.setFloat(4,Float.parseFloat(maxBidAmount));
-					ps.setFloat(5,Float.parseFloat(bidIncrement));			
+		  	
+		  	
+		  	if(auctionInfo.next()){
+		  		
+		  		
+			  	float minPriceForSale = auctionInfo.getFloat(12);
+			  	float validBidIncrForSale = auctionInfo.getFloat(11);
+			  	Date saleDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(auctionInfo.getString(10));
+			  	int saleStatus = auctionInfo.getInt(13);
+		  		
+	
+		  		
+		  	
+
+		  
+			  	// The auction has already closed
+			  	if(todaysDate.after(saleDate)){
+			  		
+			  		
+			  		
+			  		if(saleStatus == 1){
+			  			// The sale has already been closed off
+			  			session.setAttribute("makeBidStatus","Auction has closed and bid could not be placed");
+			  			
+			  		}
+			  		
+			  		else{
+			  			// We have not yet set the auction to be closed
+			  			PreparedStatement updateAuctionStatus = con.prepareStatement("UPDATE sale SET status=1 WHERE saleNumber=?");
+			  			updateAuctionStatus.setInt(1,saleNumber);
+			  			updateAuctionStatus.executeUpdate();
+			  			
+			  			session.setAttribute("makeBidStatus","Auction has closed and bid could not be placed");
+			  			
+			  			
+			  		}
+			  		
+			  		
+			  		
+			  	}
+			  	
+			  	// The auction is open, therefore bid can be placed
+			  	else{
+			  		
+			  		// The bid being placed must be greater then the current max bid
+			  		
+					Float bidInitalAmount = Float.parseFloat((String)request.getParameter("initBidAmount"));
+					Float maxBidAmount = Float.parseFloat((String)(request.getParameter("maxBidAmount")));
+			  		
+					// Check if the user has already placed a bid on sale in question
+					PreparedStatement checkBidHistory = con.prepareStatement("SELECT * FROM bids WHERE email=? AND saleNumber=?");
+					checkBidHistory.setString(1,customerEmail);
+					checkBidHistory.setInt(2,saleNumber);
+					ResultSet rs2= checkBidHistory.executeQuery();
+			  		
 					
-					ps.executeUpdate();
-					
-					
-					String insertIntoBidsHistory = "INSERT INTO bidsHistory(email,saleNumber,currentBid,maxBid,automaticBidIncrement,bidDateTime) VALUES(?,?,?,?,?,?)";
-					PreparedStatement ps1 = con.prepareStatement(insertIntoBidsHistory);
-					ps1.setString(1,customerEmail);
-					ps1.setInt(2,saleNumber);
-					ps1.setFloat(3,Float.parseFloat(bidInitalAmount));
-					ps1.setFloat(4,Float.parseFloat(maxBidAmount));
-					ps1.setFloat(5,Float.parseFloat(bidIncrement));					
-					ps1.setTimestamp(6,java.sql.Timestamp.valueOf(todaysDateTime));
-					ps1.executeUpdate();
-					
-					session.setAttribute("makeBidStatus","Bid was successfully placed");
-				}
-				
-				else if(saleStatus == 1){
-					
-					session.setAttribute("makeBidStatus","Bid not placed, sale has already closed.");
-				}
-			}
-			
-			
-			else{
-				
-				
-				session.setAttribute("makeBidStatus","Sale does not exist");	
-				
-				
-				
-				
-			}
-			
-			
+			  		if(rs2.next()){
+			  			
+			  			if(bidInitalAmount > rs2.getFloat(3)){
+				  			// There is already a bid in place, delete the bid and then place the bid
+				  			
+				  			PreparedStatement updateCurrentBid = con.prepareStatement("UPDATE bids SET currentBid=? AND maxBid=? WHERE email=? AND saleNumber=?");
+				  			updateCurrentBid.setFloat(1,bidInitalAmount);
+				  			updateCurrentBid.setFloat(2,maxBidAmount);
+				  			updateCurrentBid.setString(3,"customerEmail");
+				  			updateCurrentBid.setInt(4,saleNumber);
+				  			updateCurrentBid.executeUpdate();
+				  			
+				  			PreparedStatement createNewBidHistory = con.prepareStatement("INSERT INTO bidsHistory(email,saleNumber,currentBid,bidDateTime) VALUES(?,?,?,?)");
+				  			createNewBidHistory.setString(1,"customerEmail");
+				  			createNewBidHistory.setInt(2,saleNumber);
+				  			createNewBidHistory.setFloat(3,bidInitalAmount);
+				  			createNewBidHistory.setTimestamp(4,java.sql.Timestamp.valueOf(todaysDateTime));
+				  			createNewBidHistory.executeUpdate();
+				  			
+				  			session.setAttribute("makeBidStatus","Bid was successfully placed");
+			  			}
+			  		}
+			  		
+			  		else{
+			  			// There is no bid in place,
+			  			
+			  			PreparedStatement getMaxBid = con.prepareStatement("SELECT * FROM bids WHERE saleNumber=? AND currentBid IN (SELECT MAX(currentBid) currentBid FROM bids)");
+					  	getMaxBid.setInt(1,saleNumber);
+						ResultSet rs3= getMaxBid.executeQuery();
+						
+						float currentMaxBid = 0;
+						if(rs3.next()){
+							currentMaxBid = rs3.getFloat(3);
+						}
+						
+						Float nextValidBid = currentMaxBid + validBidIncrForSale;
+						
+						if(bidInitalAmount >= nextValidBid || currentMaxBid == 0){
+							// The bid being placed is greater then the max bid by atleast the bid increment set by the seller
+							
+				  			PreparedStatement createNewBid = con.prepareStatement("INSERT INTO bids(email,saleNumber,currentBid,maxBid) VALUES(?,?,?,?)");
+				  			createNewBid.setString(1,customerEmail);
+				  			createNewBid.setInt(2,saleNumber);
+				  			createNewBid.setFloat(3,bidInitalAmount);
+				  			createNewBid.setFloat(4,maxBidAmount);
+				  			createNewBid.executeUpdate();
+				  			
+				  			PreparedStatement createNewBidHistory = con.prepareStatement("INSERT INTO bidsHistory(email,saleNumber,currentBid,bidDateTime) VALUES(?,?,?,?)");
+				  			createNewBidHistory.setString(1,customerEmail);
+				  			createNewBidHistory.setInt(2,saleNumber);
+				  			createNewBidHistory.setFloat(3,bidInitalAmount);
+				  			createNewBidHistory.setTimestamp(4,java.sql.Timestamp.valueOf(todaysDateTime));
+				  			createNewBidHistory.executeUpdate();
+							
+				  			session.setAttribute("makeBidStatus","Bid was successfully placed");
+				  			
+				  			
+				  			
+				  			// Check if the current bid being placed is greater than the maximum bid of other bidders
+				  			PreparedStatement getListOfUsers = con.prepareStatement("SELECT email FROM bids WHERE maxBid<?");
+				  			getListOfUsers.setFloat(1,bidInitalAmount);
+				  			ResultSet listOfBidders = getListOfUsers.executeQuery();
+				  			
+				  			String alertMessage = "A bidder has placed a bid greater than you maximum bid for Auction #"+saleNumber;
+				  			
+				  			do{
+				  				
+				  				
+				  				PreparedStatement insertIntoAlerts = con.prepareStatement("INSERT INTO alerts(alertID,alertContent,carName,vehicleType,manufacturer,year,color,mileage,trim,showAlert,setBy,acknowledged) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)");
+				  				insertIntoAlerts.setInt(1,0);
+				  				insertIntoAlerts.setString(2,alertMessage);
+				  				insertIntoAlerts.setString(3,"null");
+				  				insertIntoAlerts.setString(4,"null");
+				  				insertIntoAlerts.setString(5,"null");
+				  				insertIntoAlerts.setString(6,"null");
+				  				insertIntoAlerts.setString(7,"null");
+				  				insertIntoAlerts.setString(8,"null");
+				  				insertIntoAlerts.setString(9,"null");
+				  				insertIntoAlerts.setInt(10,1);
+				  				insertIntoAlerts.setInt(11,3);
+				  				insertIntoAlerts.setInt(12,0);
+				  				insertIntoAlerts.executeUpdate();
+				  				
+					 			PreparedStatement getSellerAlertID = con.prepareStatement("SELECT LAST_INSERT_ID()");
+								ResultSet rs4= getSellerAlertID.executeQuery();
+								int alertID = 0;
+								if(rs4.next()){
+									alertID = rs4.getInt(1);
+								}
+								
+								PreparedStatement insertIntoCustomerHasAlerts = con.prepareStatement("INSERT INTO customerHasAlerts(alertID,email) VALUES(?,?)");
+								insertIntoCustomerHasAlerts.setInt(1,alertID);
+								insertIntoCustomerHasAlerts.setString(2,listOfBidders.getString(1));
+								insertIntoCustomerHasAlerts.executeUpdate();
+				  				
+				  			} while(listOfBidders.next());
+				  			
+				  			
+				  			
+				  			
+				  			
+				  			
+				  			
+				  			
+				  			
+						}
+						
+						else{
+							
+							// The bid being placed is less then the max by + the bid increment set by the seller
+							// User must set a higher bid
+							
+							session.setAttribute("makeBidStatus","Bid not placed, please bid a higher amount");
+							
+							
+						}
+						
+			  			
+			  			
+			  			
+	
+			  			
+			  		}
+		  		
+		  		
+		  		
+		  		
+		  		
+		  		
+		  		
+		  		
+		  		
+		  		}
+		  	
+		  	}
+		  	
+		  	else{
+		  		session.setAttribute("makeBidStatus","Auction does not exist");
+		  	}
+
 			con.close();
 			response.sendRedirect(request.getHeader("referer"));	
 
@@ -141,7 +258,6 @@
 
 	%>
 	
-		<h1>Your sale was created successfully!</h1>
 	
 	
 	</body>
