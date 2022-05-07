@@ -103,27 +103,77 @@
 					checkBidHistory.setString(1,customerEmail);
 					checkBidHistory.setInt(2,saleNumber);
 					ResultSet rs2= checkBidHistory.executeQuery();
-			  		
+				
 					
 			  		if(rs2.next()){
 			  			
 			  			if(bidInitalAmount > rs2.getFloat(3)){
 				  			// There is already a bid in place, delete the bid and then place the bid
-				  			
-				  			PreparedStatement updateCurrentBid = con.prepareStatement("UPDATE bids SET currentBid=? AND maxBid=? WHERE email=? AND saleNumber=?");
+
+				  			PreparedStatement updateCurrentBid = con.prepareStatement("UPDATE bids SET currentBid=? WHERE email=? AND saleNumber=?");
 				  			updateCurrentBid.setFloat(1,bidInitalAmount);
-				  			updateCurrentBid.setFloat(2,maxBidAmount);
-				  			updateCurrentBid.setString(3,"customerEmail");
-				  			updateCurrentBid.setInt(4,saleNumber);
+				  			updateCurrentBid.setString(2,customerEmail);
+				  			updateCurrentBid.setInt(3,saleNumber);
 				  			updateCurrentBid.executeUpdate();
 				  			
+				  			PreparedStatement updateMaxBid = con.prepareStatement("UPDATE bids SET maxBid=? WHERE email=? AND saleNumber=?");
+				  			updateMaxBid.setFloat(1,maxBidAmount);
+				  			updateMaxBid.setString(2,customerEmail);
+				  			updateMaxBid.setInt(3,saleNumber);				  			
+				  			updateMaxBid.executeUpdate();
+				  			
 				  			PreparedStatement createNewBidHistory = con.prepareStatement("INSERT INTO bidsHistory(email,saleNumber,currentBid,bidDateTime) VALUES(?,?,?,?)");
-				  			createNewBidHistory.setString(1,"customerEmail");
+				  			createNewBidHistory.setString(1,customerEmail);
 				  			createNewBidHistory.setInt(2,saleNumber);
 				  			createNewBidHistory.setFloat(3,bidInitalAmount);
 				  			createNewBidHistory.setTimestamp(4,java.sql.Timestamp.valueOf(todaysDateTime));
 				  			createNewBidHistory.executeUpdate();
 				  			
+				  			
+				  			// Check if the current bid being placed is greater than the maximum bid of other bidders
+				  			PreparedStatement getListOfUsers = con.prepareStatement("SELECT email FROM bids WHERE saleNumber=? AND maxBid<?");
+				  			getListOfUsers.setFloat(1,saleNumber);
+				  			getListOfUsers.setFloat(2,bidInitalAmount);
+				  			ResultSet listOfBidders = getListOfUsers.executeQuery();
+				  			
+				  			if(listOfBidders.next()){
+					  			
+					  			String alertMessage = "A bidder has placed a bid greater than you maximum bid for Auction #"+saleNumber;
+					  			do{
+					  				
+					  				
+					  				PreparedStatement insertIntoAlerts = con.prepareStatement("INSERT INTO alerts(alertID,alertContent,carName,vehicleType,manufacturer,year,color,mileage,trim,showAlert,setBy,acknowledged) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)");
+					  				insertIntoAlerts.setInt(1,0);
+					  				insertIntoAlerts.setString(2,alertMessage);
+					  				insertIntoAlerts.setString(3,"null");
+					  				insertIntoAlerts.setString(4,"null");
+					  				insertIntoAlerts.setString(5,"null");
+					  				insertIntoAlerts.setString(6,"null");
+					  				insertIntoAlerts.setString(7,"null");
+					  				insertIntoAlerts.setString(8,"null");
+					  				insertIntoAlerts.setString(9,"null");
+					  				insertIntoAlerts.setInt(10,1);
+					  				insertIntoAlerts.setInt(11,3);
+					  				insertIntoAlerts.setInt(12,0);
+					  				insertIntoAlerts.executeUpdate();
+					  				
+						 			PreparedStatement getSellerAlertID = con.prepareStatement("SELECT LAST_INSERT_ID()");
+									ResultSet rs4= getSellerAlertID.executeQuery();
+									int alertID = 0;
+									if(rs4.next()){
+										alertID = rs4.getInt(1);
+									}
+									
+									PreparedStatement insertIntoCustomerHasAlerts = con.prepareStatement("INSERT INTO customerHasAlerts(alertID,email) VALUES(?,?)");
+									insertIntoCustomerHasAlerts.setInt(1,alertID);
+									insertIntoCustomerHasAlerts.setString(2,listOfBidders.getString(1));
+									insertIntoCustomerHasAlerts.executeUpdate();
+					  				
+					  			} while(listOfBidders.next());
+					  			
+				  			
+				  			
+				  			}
 				  			session.setAttribute("makeBidStatus","Bid was successfully placed");
 			  			}
 			  		}
@@ -162,49 +212,101 @@
 				  			session.setAttribute("makeBidStatus","Bid was successfully placed");
 				  			
 				  			
+				  			PreparedStatement usersToNotify = con.prepareStatement("SELECT email FROM bids WHERE saleNumber=? AND email <> ?");
+				  			usersToNotify.setInt(1,saleNumber);
+				  			usersToNotify.setString(2,customerEmail);
+				  			ResultSet notifyBidders = usersToNotify.executeQuery();
+				  			
+				  			if(notifyBidders.next()){
+				  				
+				  				String alertMessage = "A higher bid has been placed by another bidder for Auction #" +saleNumber;
+				  				
+				  				do {
+				  					
+					  				PreparedStatement insertIntoAlerts = con.prepareStatement("INSERT INTO alerts(alertID,alertContent,carName,vehicleType,manufacturer,year,color,mileage,trim,showAlert,setBy,acknowledged) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)");
+					  				insertIntoAlerts.setInt(1,0);
+					  				insertIntoAlerts.setString(2,alertMessage);
+					  				insertIntoAlerts.setString(3,"null");
+					  				insertIntoAlerts.setString(4,"null");
+					  				insertIntoAlerts.setString(5,"null");
+					  				insertIntoAlerts.setString(6,"null");
+					  				insertIntoAlerts.setString(7,"null");
+					  				insertIntoAlerts.setString(8,"null");
+					  				insertIntoAlerts.setString(9,"null");
+					  				insertIntoAlerts.setInt(10,1);
+					  				insertIntoAlerts.setInt(11,3);
+					  				insertIntoAlerts.setInt(12,0);
+					  				insertIntoAlerts.executeUpdate();
+					  				
+						 			PreparedStatement getSellerAlertID = con.prepareStatement("SELECT LAST_INSERT_ID()");
+									ResultSet rs4= getSellerAlertID.executeQuery();
+									int alertID = 0;
+									if(rs4.next()){
+										alertID = rs4.getInt(1);
+									}
+									
+									PreparedStatement insertIntoCustomerHasAlerts = con.prepareStatement("INSERT INTO customerHasAlerts(alertID,email) VALUES(?,?)");
+									insertIntoCustomerHasAlerts.setInt(1,alertID);
+									insertIntoCustomerHasAlerts.setString(2,notifyBidders.getString(1));
+									insertIntoCustomerHasAlerts.executeUpdate();				  					
+				  					
+				  					
+				  					
+				  					
+				  				}	while(notifyBidders.next());
+				  				
+				  				
+				  				
+				  			}
+				  			
+				  			
+				  			
+				  			
 				  			
 				  			// Check if the current bid being placed is greater than the maximum bid of other bidders
-				  			PreparedStatement getListOfUsers = con.prepareStatement("SELECT email FROM bids WHERE maxBid<?");
-				  			getListOfUsers.setFloat(1,bidInitalAmount);
+				  			PreparedStatement getListOfUsers = con.prepareStatement("SELECT email FROM bids WHERE saleNumber=? AND maxBid<?");
+				  			getListOfUsers.setFloat(1,saleNumber);
+				  			getListOfUsers.setFloat(2,bidInitalAmount);
 				  			ResultSet listOfBidders = getListOfUsers.executeQuery();
 				  			
-				  			String alertMessage = "A bidder has placed a bid greater than you maximum bid for Auction #"+saleNumber;
+				  			if(listOfBidders.next()){
+					  			
+					  			String alertMessage = "A bidder has placed a bid greater than you maximum bid for Auction #"+saleNumber;
+					  			do{
+					  				
+					  				
+					  				PreparedStatement insertIntoAlerts = con.prepareStatement("INSERT INTO alerts(alertID,alertContent,carName,vehicleType,manufacturer,year,color,mileage,trim,showAlert,setBy,acknowledged) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)");
+					  				insertIntoAlerts.setInt(1,0);
+					  				insertIntoAlerts.setString(2,alertMessage);
+					  				insertIntoAlerts.setString(3,"null");
+					  				insertIntoAlerts.setString(4,"null");
+					  				insertIntoAlerts.setString(5,"null");
+					  				insertIntoAlerts.setString(6,"null");
+					  				insertIntoAlerts.setString(7,"null");
+					  				insertIntoAlerts.setString(8,"null");
+					  				insertIntoAlerts.setString(9,"null");
+					  				insertIntoAlerts.setInt(10,1);
+					  				insertIntoAlerts.setInt(11,3);
+					  				insertIntoAlerts.setInt(12,0);
+					  				insertIntoAlerts.executeUpdate();
+					  				
+						 			PreparedStatement getSellerAlertID = con.prepareStatement("SELECT LAST_INSERT_ID()");
+									ResultSet rs4= getSellerAlertID.executeQuery();
+									int alertID = 0;
+									if(rs4.next()){
+										alertID = rs4.getInt(1);
+									}
+									
+									PreparedStatement insertIntoCustomerHasAlerts = con.prepareStatement("INSERT INTO customerHasAlerts(alertID,email) VALUES(?,?)");
+									insertIntoCustomerHasAlerts.setInt(1,alertID);
+									insertIntoCustomerHasAlerts.setString(2,listOfBidders.getString(1));
+									insertIntoCustomerHasAlerts.executeUpdate();
+					  				
+					  			} while(listOfBidders.next());
+					  			
 				  			
-				  			do{
-				  				
-				  				
-				  				PreparedStatement insertIntoAlerts = con.prepareStatement("INSERT INTO alerts(alertID,alertContent,carName,vehicleType,manufacturer,year,color,mileage,trim,showAlert,setBy,acknowledged) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)");
-				  				insertIntoAlerts.setInt(1,0);
-				  				insertIntoAlerts.setString(2,alertMessage);
-				  				insertIntoAlerts.setString(3,"null");
-				  				insertIntoAlerts.setString(4,"null");
-				  				insertIntoAlerts.setString(5,"null");
-				  				insertIntoAlerts.setString(6,"null");
-				  				insertIntoAlerts.setString(7,"null");
-				  				insertIntoAlerts.setString(8,"null");
-				  				insertIntoAlerts.setString(9,"null");
-				  				insertIntoAlerts.setInt(10,1);
-				  				insertIntoAlerts.setInt(11,3);
-				  				insertIntoAlerts.setInt(12,0);
-				  				insertIntoAlerts.executeUpdate();
-				  				
-					 			PreparedStatement getSellerAlertID = con.prepareStatement("SELECT LAST_INSERT_ID()");
-								ResultSet rs4= getSellerAlertID.executeQuery();
-								int alertID = 0;
-								if(rs4.next()){
-									alertID = rs4.getInt(1);
-								}
-								
-								PreparedStatement insertIntoCustomerHasAlerts = con.prepareStatement("INSERT INTO customerHasAlerts(alertID,email) VALUES(?,?)");
-								insertIntoCustomerHasAlerts.setInt(1,alertID);
-								insertIntoCustomerHasAlerts.setString(2,listOfBidders.getString(1));
-								insertIntoCustomerHasAlerts.executeUpdate();
-				  				
-				  			} while(listOfBidders.next());
 				  			
-				  			
-				  			
-				  			
+				  			}
 				  			
 				  			
 				  			
@@ -253,7 +355,7 @@
 		catch (Exception ex){
 			out.println(ex);
 			session.setAttribute("makeBidStatus","Bid could not be placed, please try again");
-			//response.sendRedirect("Home.jsp");	
+			response.sendRedirect("Home.jsp");	
 		} 
 
 	%>

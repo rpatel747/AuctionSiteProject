@@ -9,38 +9,51 @@
 <html>
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-		<title>Home</title>
+		<title>Customer Questions</title>
 		<style><%@include file="./CSS/home.css"%></style>
 	</head>
 	
 	<body>
 	
 
-		<h1><%
-		String username = (String) session.getAttribute("username");
-		out.println("Welcome " + username +"!");
-		%></h1>
-		
-		<form id="logOutButton"  method="post" action="logOut.jsp">
-			<input type="submit" value="Log Out">
-		</form>
-		
-		
-		<br>
-		<br>
 		
 		<div class="topNavBar">
 			<ul>
 				<li><a href="./employeePortal.jsp">Home</a></li>
 				<li><a href="./manageCustQuestions.jsp">Manage Customer Questions</a><li>
 				<li><a href="./manageAuctions.jsp">Manage Auctions</a><li>
-				<li><a href="./manageBids.jsp">Manage Bids</a><li>
-				<li><a href="./accountSettings.jsp">Account Settings</a></li>
+				<li><a href="./manageCustomerAccounts.jsp">Manage Customer Accounts</a><li>
+				<li><a href="./logOut.jsp">Log Out</a></li>
 			</ul>
 		</div>
 		
 		<br>
+
+		<div>
+		
+			<h2>Create FAQ</h2>
+			<form method="post" action="createFAQ.jsp">
+				<label for="topic">Topic:</label>
+				<input type="text" name="topic">
+				<br>
+				<br>
+				<label for="questionContent">Question Content:</label>
+				<input type="text" name="questionContent">
+				<br>
+				<br>
+				<label for="questionAnswer">Question Answer:</label>
+				<input type="text" name="questionAnswer">
+				<br>
+				<br>
+				<input type="submit" value="Create FAQ">
+				
+			</form>
+		
+		
+		</div>
 		<br>
+		
+	
 		
 		<div>
 			<h2>Answer Question Form</h2>
@@ -86,6 +99,7 @@
 							<table>
 								<tr>
 									<th>Question ID</th>
+									<th>Customer ID</th>
 									<th>Topic</th>
 									<th>Customers Question:</th>
 									<th>Status</th>
@@ -93,8 +107,16 @@
 							<%
 							do{
 								
+								PreparedStatement getUsername = con.prepareStatement("SELECT username FROM customerHas WHERE email IN(SELECT email FROM asksQuestion WHERE questionID=?)");
+								getUsername.setInt(1,rs.getInt(1));
+								ResultSet customerUsername = getUsername.executeQuery();
 								
-
+								String cname = "";
+								if(customerUsername.next()){
+									cname = customerUsername.getString(1);
+								}
+								
+								
 								
 								String status;
 								if(rs.getInt(5) == 1){
@@ -113,6 +135,7 @@
 								
 								<tr >
 									<td><%= rs.getInt(1) %></td>
+									<td><%= cname %></td>
 									<td><%= rs.getString(2) %></td>
 									<td><%= rs.getString(3) %></td>
 									<td><%= status %></td>		

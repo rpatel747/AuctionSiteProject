@@ -13,32 +13,21 @@
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">		
 		<style><%@include file="./CSS/home.css"%></style>
+		<title>Customer Auctions</title>
 	</head>
 	
 	
 	
 	<body>
 	
-	<h1><%
-		String username = (String) session.getAttribute("username");
-		out.println("Welcome " + username +"!");
-		%></h1>
-		
-		<form id="logOutButton"  method="post" action="logOut.jsp">
-			<input type="submit" value="Log Out">
-		</form>
-		
-		
-		<br>
-		<br>
 		
 		<div class="topNavBar">
 			<ul>
 				<li><a href="./employeePortal.jsp">Home</a></li>
 				<li><a href="./manageCustQuestions.jsp">Manage Customer Questions</a><li>
 				<li><a href="./manageAuctions.jsp">Manage Auctions</a><li>
-				<li><a href="./manageBids.jsp">Manage Bids</a><li>
-				<li><a href="./accountSettings.jsp">Account Settings</a></li>
+				<li><a href="./manageCustomerAccounts.jsp">Manage Customer Accounts</a><li>
+				<li><a href="./logOut.jsp">Log Out</a></li>
 			</ul>
 		</div>
 		
@@ -57,13 +46,13 @@
 			<label for="reason">Reason for Deletion:</label>
 			<input type="text" name="reason">
 			<br>
+			<br>
 			<input type="submit" value="Delete Auction">
 		</form>
 		
 		
 		<h2>Delete Bids Form</h2>
-		<h4>**For the form, if you are deleting all bids for user account please enter Auction ID: 0**</h4>
-		<h4>ADD MORE WARNINGS HERE::::::::</h4>
+		<h4>** For the form, if you are deleting all bids for user account please enter Auction ID: 0 **</h4>
 		<form method="post" action="deleteBids.jsp">
 			<label for="auctionID">Auction ID:</label>
 			<input type="text" name="auctionID" required>
@@ -161,34 +150,39 @@
 			
 				ResultSet rs= stmt.executeQuery();
 				
+				%>
+				
+				<h2>All Open Auctions:</h2>
+				
+				
+				<table>
+					<tr>
+						<th>Sale Number</th>
+						<th>Car Name</th>
+						<th>Manufactured Year</th>
+						<th>Manufacturer</th>
+						<th>Mileage</th>
+						<th>Current Price</th>
+						<th>Trim</th>
+						<th>Vehicle Type</th>
+						<th>Color</th>
+						<th>Sale Finish</th>
+						<td>Highest Bid</td>
+						<th>Status</th>
+					</tr>
+				<%
+				
 				if(!rs.next()){
-					out.println("There are no sales currently.");
+					%>
+					<tr>
+						<td colspan="12">There are no sales in the system</td>
+					</tr>
+					<%
 					con.close();
 				}
 				else{
 					
-					
-					%>
-					
-					<h1>All Open Auctions:</h1>
-					
-					
-					<table>
-						<tr>
-							<th>Sale Number</th>
-							<th>Car Name</th>
-							<th>Manufactured Year</th>
-							<th>Manufacturer</th>
-							<th>Mileage</th>
-							<th>Current Price</th>
-							<th>Trim</th>
-							<th>Vehicle Type</th>
-							<th>Color</th>
-							<th>Sale Finish</th>
-							<td>Highest Bid</td>
-							<th>Status</th>
-						</tr>
-					<%
+					int numOfSalesPrinted = 0;
 					do{
 						
 						
@@ -215,7 +209,7 @@
 						
 						
 						
-						
+						numOfSalesPrinted++;
 						%>
 						
 						<tr >
@@ -238,6 +232,14 @@
 						
 						
 					<%}while(rs.next());
+
+					if(numOfSalesPrinted == 0){
+						%>
+						<tr>
+							<td colspan="12">There are no sales in the system</td>
+						</tr>
+						<%						
+					}
 					
 					%> </table><%
 					
@@ -270,33 +272,38 @@
 			
 				ResultSet rs= stmt.executeQuery();
 				
+				%>
+				
+				<h2>All Closed Auctions</h2>
+				
+				
+				<table>
+					<tr>
+						<th>Sale Number</th>
+						<th>Car Name</th>
+						<th>Manufactured Year</th>
+						<th>Manufacturer</th>
+						<th>Mileage</th>
+						<th>Current Price</th>
+						<th>Trim</th>
+						<th>Vehicle Type</th>
+						<th>Color</th>
+						<th>Sale Finish</th>
+						<td>Highest Bid</td>
+						<th>Status</th>
+					</tr>
+				<%
+				
 				if(!rs.next()){
+					%>
+						<tr>
+							<td colspan="12">There are no sales in the system</td>
+						</tr>
+					<%
 					con.close();
 				}
 				else{
-					
-					
-					%>
-					
-					<h1>All Closed Auctions</h1>
-					
-					
-					<table>
-						<tr>
-							<th>Sale Number</th>
-							<th>Car Name</th>
-							<th>Manufactured Year</th>
-							<th>Manufacturer</th>
-							<th>Mileage</th>
-							<th>Current Price</th>
-							<th>Trim</th>
-							<th>Vehicle Type</th>
-							<th>Color</th>
-							<th>Sale Finish</th>
-							<td>Highest Bid</td>
-							<th>Status</th>
-						</tr>
-					<%
+					int numOfSalesPrinted = 0;
 					do{
 						
 						
@@ -323,7 +330,7 @@
 						
 						
 						
-						
+						numOfSalesPrinted++;
 						%>
 						
 						<tr >
@@ -346,6 +353,16 @@
 						
 						
 					<%}while(rs.next());
+					
+					
+					if(numOfSalesPrinted == 0){
+						%>
+						<tr>
+							<td colspan="12">There are no sales in the system</td>
+						</tr>
+						<%						
+					}
+					
 					
 					%> </table><%
 					

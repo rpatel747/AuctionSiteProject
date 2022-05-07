@@ -16,50 +16,19 @@
 	<body>
 	
 
-		<h1><%
-		String username = (String) session.getAttribute("username");
-		out.println("Welcome " + username +"!");
-		%></h1>
-		
-		<form id="logOutButton"  method="post" action="logOut.jsp">
-			<input type="submit" value="Log Out">
-		</form>
-		
-		
-		<br>
-		<br>
-		
 		<div class="topNavBar">
 			<ul>
 				<li><a href="./employeePortal.jsp">Home</a></li>
 				<li><a href="./manageCustQuestions.jsp">Manage Customer Questions</a><li>
 				<li><a href="./manageAuctions.jsp">Manage Auctions</a><li>
-				<li><a href="./accountSettings.jsp">Account Settings</a></li>
+				<li><a href="./manageCustomerAccounts.jsp">Manage Customer Accounts</a><li>
+				<li><a href="./logOut.jsp">Log Out</a></li>
 			</ul>
 		</div>
 		
 		<br>
 		<br>
-		
-		<div>
-		
-			<h2>Create FAQ</h2>
-			<form method="post" action="createFAQ.jsp">
-				<label for="topic">Topic:</label>
-				<input type="text" name="topic">
-				<br>
-				<label for="questionContent">Question Content:</label>
-				<input type="text" name="questionContent">
-				<br>
-				<label for="questionAnswer">Question Answer:</label>
-				<input type="text" name="questionAnswer">
-				<br>
-				<input type="submit" value="Create FAQ">
-				
-			</form>
-		
-		
-		</div>
+
 
 	</body>
 </html>

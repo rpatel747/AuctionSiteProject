@@ -12,12 +12,24 @@
 
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">		
-		<style><%@include file="./CSS/searches.css"%></style>
+		<style><%@include file="./CSS/home.css"%></style>
 	</head>
 	
 	
 	<body>
 	
+	
+		<div class="topNavBar">
+			<ul>
+				<li><a href="./Home.jsp">Home</a></li>
+				<li><a href="./mySales.jsp">My Sales</a></li>
+				<li><a href="./myBids.jsp">My Bids</a></li>
+				<li><a href="./myAlerts.jsp">My Alerts</a></li>
+				<li><a href="./customerServiceTab.jsp">Customer Support</a><li>
+				<li><a href="./accountSettings.jsp">Account Settings</a></li>
+				<li><a href="./logOut.jsp">Log Out</a><li>
+			</ul>
+		</div>
 	
 		<%
 		try {
@@ -34,14 +46,7 @@
 		
 
 		
-			if(!rs.next()){
-				out.println("There are no sales currently.");
-				
-			}
-			else{
-				
 
-				
 				%>
 				
 				<h1>My Active Sales</h1>
@@ -64,6 +69,10 @@
 						<th>Status</th>
 					</tr>
 				<%
+				
+			if(rs.next()){
+				
+
 				do{
 
 					PreparedStatement getMaxBid = con.prepareStatement("SELECT MAX(currentBid) FROM bids WHERE saleNumber=?");
@@ -101,10 +110,7 @@
 					
 				<%}while(rs.next());
 				
-				%> </table><%
-				
-				
-				con.close();
+
 				
 			
 				
@@ -117,16 +123,21 @@
 				
 			}
 		
-			%>	
-			
-			<form id="backToHome"  method="post" action="Home.jsp">
-				<input type="submit" value="Back to Home">
-			</form>				
+			else{
+				%>
 				
-			<%			
+				<tr>
+					<td colspan="13">No Active Sales</td>
+				</tr>
+				
+				<%
+			}
 			
 			
+			%> </table><%
 			
+			
+			con.close();			
 			
 			
 			
@@ -146,6 +157,29 @@
 	<%
 		try {
 			
+			%>
+			<h1>Previous Auctions</h1>
+			
+			
+			<table>
+				<tr>
+					<th>Sale Number</th>
+					<th>Car Name</th>
+					<th>Manufactured Year</th>
+					<th>Manufacturer</th>
+					<th>Mileage</th>
+					<th>Current Price</th>
+					<th>Trim</th>
+					<th>Vehicle Type</th>
+					<th>Color</th>
+					<th>Sale Finish</th>
+					<th>Minimum Price</th>
+					<td>Highest Bid</td>
+					<th>Status</th>
+				</tr>
+			<% 
+			
+			
 			ApplicationDB db = new ApplicationDB();
 			Connection con = db.getConnection();
 			
@@ -158,36 +192,13 @@
 		
 
 		
-			if(!rs.next()){
-				out.println("There are no sales currently.");
-				
-			}
-			else{
+
+			if(rs.next()){
 				
 
 				
-				%>
 				
-				<h1>Previous Auctions</h1>
-				
-				
-				<table>
-					<tr>
-						<th>Sale Number</th>
-						<th>Car Name</th>
-						<th>Manufactured Year</th>
-						<th>Manufacturer</th>
-						<th>Mileage</th>
-						<th>Current Price</th>
-						<th>Trim</th>
-						<th>Vehicle Type</th>
-						<th>Color</th>
-						<th>Sale Finish</th>
-						<th>Minimum Price</th>
-						<td>Highest Bid</td>
-						<th>Status</th>
-					</tr>
-				<%
+			
 				do{
 
 					PreparedStatement getMaxBid = con.prepareStatement("SELECT MAX(currentBid) FROM bids WHERE saleNumber=?");
@@ -237,32 +248,27 @@
 					
 					
 				<%}while(rs.next());
-				
-				%> </table><%
-				
-				
-				con.close();
-				
+
 			
-				
-				
-				
-				
-				
-				
-				
+						
 				
 			}
-		
-			%>	
-			
-			<form id="backToHome"  method="post" action="Home.jsp">
-				<input type="submit" value="Back to Home">
-			</form>				
+	
+			else{
+				%>
 				
-			<%			
+				<tr>
+					<td colspan="13">No Previous Sales</td>
+				</tr>
+				
+				<%
+			}			
+			
+			%> </table><%
 			
 			
+			con.close();
+						
 			
 			
 			

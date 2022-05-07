@@ -16,22 +16,10 @@
 	<body>
 	
 
-		<h1><%
-		String username = (String) session.getAttribute("username");
-		out.println("Welcome " + username +"!");
-		%></h1>
-		
-		<form id="logOutButton"  method="post" action="logOut.jsp">
-			<input type="submit" value="Log Out">
-		</form>
-		
-		
-		<br>
-		
-		<div class="topNavBar">
+		<div class="topNavBar" id=".center">
 			<ul>
-				<li><a href="./adminPortal.jsp">Manage Employees</a></li>
-				<li><a href="./mySales.jsp">Sales Information</a></li>
+				<li><a href="./adminPortal.jsp">Home</a></li>
+				<li><a href="./logOut.jsp">Log Out</a></li>
 			</ul>
 		</div>
 		
@@ -149,7 +137,7 @@
 	
 		<div class="container">
 	
-		
+	
 			<h2>Delete Employee:</h2>
 			
 			<form id="deleteEmployee" autocomplete="off" method="POST" action="deleteEmployee.jsp">
@@ -175,9 +163,35 @@
 		
 		
 		
+		</div>
+		
+		
+		<br>
+		<br>
+		
+		
+		<div class="container">
+		
+			<h2>Sales Report</h2>
+			
+			<form id="generateSales" method="POST" action="generateSales.jsp">
+			
+				<input type="submit" value="Generate Report">
+			
+			
+			
+			</form>
+		
+		
 		
 		
 		</div>
+		
+		
+		
+		
+		
+		
 
 	</body>
 </html>

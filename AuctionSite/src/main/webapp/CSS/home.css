@@ -6,7 +6,7 @@ body{
     font-family:Arial;
 }
 
-h1,h2{
+h1,h2,h3{
     color:#7B435B;
 	text-align: center;
 }
@@ -37,15 +37,35 @@ h1,h2{
 	
 }
 
-ul{
-	list-style-type:none;
-	margin:0;
-	padding:0;
+ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background-color: #333;
 }
 
-li{
-	display:inline;	
+li {
+  float: left;
 }
+
+li a {
+  display: block;
+  color: white;
+  text-align: center;
+  padding: 14px 16px;
+  text-decoration: none;
+}
+
+/* Change the link color to #111 (black) on hover */
+li a:hover {
+  background-color: #111;
+}
+
+
+
+
+
 
 li.menu-item{
 	margin: 0 0 10px 0;	
@@ -77,3 +97,45 @@ h1{
   0% { transform: translateY(-100px);}
   100% {transform: translateY(0);}		
 }
+
+table{
+  	margin-left: auto;
+  	margin-right: auto;	
+    border-collapse: collapse;
+    margin: 25px 0;
+    font-size: 0.9em;
+    font-family: sans-serif;
+    min-width: 400px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);	
+	
+}
+
+.center{
+  margin-left: auto;
+  margin-right: auto;
+}
+
+thead tr {
+    background-color: #009879;
+    color: #ffffff;
+    text-align: left;
+}
+
+th,td {
+    padding: 12px 15px;
+}
+
+tbody tr {
+    border-bottom: 1px solid #dddddd;
+}
+
+tbody tr:nth-of-type(even) {
+    background-color: #f3f3f3;
+}
+
+tbody tr:last-of-type {
+    border-bottom: 2px solid #009879;
+}
+
+
+

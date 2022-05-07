@@ -68,7 +68,7 @@
 				<h1>All Current Sales:</h1>
 				
 				
-				<table>
+				<table id="viewSalesTable">
 					<tr>
 						<th>Auction Number</th>
 						<th>Seller</th>
@@ -88,8 +88,9 @@
 				do{
 					
 					
-					PreparedStatement getMaxBid = con.prepareStatement("SELECT * FROM bids WHERE saleNumber=? AND currentBid IN (SELECT MAX(currentBid) currentBid FROM bids)");
+					PreparedStatement getMaxBid = con.prepareStatement("SELECT * FROM bids WHERE saleNumber=? AND currentBid IN (SELECT MAX(currentBid) currentBid FROM bids WHERE saleNumber=?)");
 				  	getMaxBid.setInt(1,rs.getInt(1));
+				  	getMaxBid.setInt(2,rs.getInt(1));
 					ResultSet rs2= getMaxBid.executeQuery();
 					
 					String status;

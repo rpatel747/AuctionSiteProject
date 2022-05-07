@@ -56,7 +56,9 @@
 					float minPrice = rs.getFloat(12); 
 					int soldStatus = rs.getInt(13);
 					
-					
+					if(trim.isEmpty()){
+						trim = "null";
+					}
 					
 					
 					if(soldStatus == 1){
@@ -80,8 +82,9 @@
 				  	// set the sale status as 1 and place the winner with the max bid
 				  	// as the winner in the won relationship
 				  	
-					PreparedStatement getMaxBid = con.prepareStatement("SELECT * FROM bids WHERE saleNumber=? AND currentBid IN (SELECT MAX(currentBid) currentBid FROM bids)");
+					PreparedStatement getMaxBid = con.prepareStatement("SELECT * FROM bids WHERE saleNumber=? AND currentBid IN (SELECT MAX(currentBid) currentBid FROM bids WHERE saleNumber=?)");
 				  	getMaxBid.setInt(1,saleNumber);
+				  	getMaxBid.setInt(2,saleNumber);
 					ResultSet rs2= getMaxBid.executeQuery();
 					
 					
@@ -202,8 +205,7 @@
 								// Close the auction
 								
 									// Update the sale so that its status is set to 1 (closed)
-									String insert = "UPDATE sale SET status=? WHERE saleNumber=?";
-									PreparedStatement ps3 = con.prepareStatement(insert);
+									PreparedStatement ps3 = con.prepareStatement("UPDATE sale SET status=? WHERE saleNumber=?");
 									ps3.setInt(1,1);
 									ps3.setInt(2,saleNumber);
 									ps3.executeUpdate();
@@ -239,6 +241,9 @@
 									getSellerEmail.setInt(1,saleNumber);
 									ResultSet sellerEmail = getSellerEmail.executeQuery();	
 									
+									if(sellerEmail.next()){
+										
+									}
 									
 									PreparedStatement updateCustomerHas = con.prepareStatement("INSERT INTO customerHasAlerts(alertID,email) VALUES(?,?)");
 									updateCustomerHas.setInt(1,alertID);
@@ -267,8 +272,9 @@
 				  			
 				  			do{
 				  				
-								PreparedStatement getMB = con.prepareStatement("SELECT * FROM bids WHERE saleNumber=? AND currentBid IN (SELECT MAX(currentBid) currentBid FROM bids)");
+								PreparedStatement getMB = con.prepareStatement("SELECT * FROM bids WHERE saleNumber=? AND currentBid IN (SELECT MAX(currentBid) currentBid FROM bids WHERE saleNumber=?)");
 								getMB.setInt(1,saleNumber);
+								getMB.setInt(2,saleNumber);
 								ResultSet rs3= getMB.executeQuery();
 								
 								float currentMaxBid = 0;

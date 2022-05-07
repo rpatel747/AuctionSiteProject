@@ -12,13 +12,24 @@
 
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">		
-		<style><%@include file="./CSS/searches.css"%></style>
+		<style><%@include file="./CSS/home.css"%></style>
+		<title>My Bids</title>
 	</head>
 	
 	
 	<body>
 	
-		
+		<div class="topNavBar">
+			<ul>
+				<li><a href="./Home.jsp">Home</a></li>
+				<li><a href="./mySales.jsp">My Sales</a></li>
+				<li><a href="./myBids.jsp">My Bids</a></li>
+				<li><a href="./myAlerts.jsp">My Alerts</a></li>
+				<li><a href="./customerServiceTab.jsp">Customer Support</a><li>
+				<li><a href="./accountSettings.jsp">Account Settings</a></li>
+				<li><a href="./logOut.jsp">Log Out</a><li>
+			</ul>
+		</div>		
 	
 		<h1>My Active Bids:</h1>
 	

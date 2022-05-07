@@ -7,7 +7,8 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Insert title here</title>
+		<title>Search</title>
+		<style><%@include file="./CSS/home.css"%></style>
 </head>
 
 <body>
@@ -48,6 +49,7 @@
 			
 			if(manufacturer.isEmpty()){
 				manufacturer = "null";
+			}
 			
 			if(mileage.isEmpty()){
 				mileage = "null";
@@ -69,7 +71,7 @@
 				price = "null";
 			}
 			
-			String searchCriteria = new String[8];
+			String[] searchCriteria = new String[8];
 			searchCriteria[0] = carName;
 			searchCriteria[1] = manufacturedYear;
 			searchCriteria[2] = manufacturer;
@@ -87,45 +89,139 @@
 			if(sales.next()){
 				
 				
+				%>
+				
+				<h1>All Current Sales:</h1>
+				
+				
+				<table>
+					<tr>
+						<th>Auction Number</th>
+						<th>Seller</th>
+						<th>Car Name</th>
+						<th>Manufactured Year</th>
+						<th>Manufacturer</th>
+						<th>Mileage</th>
+						<th>Trim</th>
+						<th>Vehicle Type</th>
+						<th>Color</th>
+						<th>Auction Finish</th>
+						<th>Highest Bidder</th>
+						<td>Highest Bid</td>
+						<th>Status</th>
+					</tr>
+				
+				<%
+							
+				
 				do{
 					
-					String salesResult = new String[8];
-					salesResult[0] = sales.getString(2);
-					salesResult[1] = sales.getString(3);
-					salesResult[2] = sales.getString(4);
-					salesResult[3] = sales.getString(5);
-					salesResult[4] = sales.getString(6);
-					salesResult[5] = sales.getString(7);
-					salesResult[6] = sales.getString(8);
-					salesResult[7] = sales.getString(9);
+					String[] salesResult = new String[8];
+					salesResult[0] = String.valueOf(sales.getString(2));
+					salesResult[1] = String.valueOf(sales.getString(3));
+					salesResult[2] = String.valueOf(sales.getString(4));
+					salesResult[3] = String.valueOf(sales.getString(5));
+					salesResult[4] = String.valueOf(sales.getString(6));
+					salesResult[5] = String.valueOf(sales.getString(7));
+					salesResult[6] = String.valueOf(sales.getString(8));
+					salesResult[7] = String.valueOf(sales.getString(9));
 					
+					int matches = 1;
+					
+					
+					for(int i = 0;i<8;i++){
+						
+						if(searchCriteria[i].equalsIgnoreCase("null")){
+							continue;
+						}
+						
+						if(!(searchCriteria[i].equalsIgnoreCase(salesResult[i]))){
+							
+							matches = 0;
+						}
+						
+					}
+					
+					
+					if(matches == 1){
+						
+						PreparedStatement getMaxBid = con.prepareStatement("SELECT * FROM bids WHERE saleNumber=? AND currentBid IN (SELECT MAX(currentBid) currentBid FROM bids WHERE saleNumber=?)");
+					  	getMaxBid.setInt(1,sales.getInt(1));
+					  	getMaxBid.setInt(2,sales.getInt(1));
+						ResultSet rs2= getMaxBid.executeQuery();
+						
+						String status;
+						if(sales.getInt(13) == 1){
+							status = "Closed";
+						}
+						else{
+							status = "Open";
+						}
+						
+						
+						Float highestBid;
+						String highestBidder = "";
+						if(rs2.next()){
+							highestBid = rs2.getFloat(3);
+							
+							PreparedStatement getHighestBidder = con.prepareStatement("SELECT username FROM customerHas WHERE email=?");
+							getHighestBidder.setString(1,rs2.getString(1));
+							ResultSet rs3 = getHighestBidder.executeQuery();
+							
+							if(rs3.next()){
+								highestBidder = rs3.getString(1);
+							}
+							
+							
+						}
+						else{
+							highestBid = (float) 0.0;
+							highestBidder = "";
+						}
+						
+						
+						
+						PreparedStatement getSellerUsername = con.prepareStatement("SELECT username FROM customerHas WHERE email IN(SELECT email FROM sells WHERE saleNumber=?)");
+						getSellerUsername.setInt(1,sales.getInt(1));
+						ResultSet rs4 = getSellerUsername.executeQuery();
+						
+						if(rs4.next()){
+							
+						}						
+						
+						%>
+						
+						<tr>
+							<td><%= sales.getString(1) %></td>
+							<td><%= rs4.getString(1) %></td>
+							<td><%= sales.getString(2) %></td>
+							<td><%= sales.getString(3) %></td>
+							<td><%= sales.getString(4) %></td>
+							<td><%= sales.getString(6) %></td>
+							<td><%= sales.getString(7) %></td>
+							<td><%= sales.getString(8) %></td>
+							<td><%= sales.getString(9) %></td>
+							<td><%= sales.getString(10) %></td>
+							<td><%= highestBidder %></td>
+							<td>$<%= highestBid %></td>
+							<td><%= status %></td>
+						</tr>
+						
+						
+						<%
+						
+					}
 					
 					
 					
 					
 				}	while(sales.next());
-				
-				
-				
-				
-				
-				
-				
-				
-				
-				
-				
-				
-				
-				
-				
-				
-				
-				
-				
-				
-				
-				
+
+				%></table><%
+			}
+			
+			else{
+				out.println("No sales match your search criteria, please change your criteria");
 			}
 			
 		}
@@ -133,8 +229,8 @@
 	
 		catch (Exception ex){
 			out.println(ex);
-			session.setAttribute("createAuctionStatus","Error auction not created");
-			//response.sendRedirect("Home.jsp");	
+			session.setAttribute("createAuctionStatus","Error sales could not be found");
+			response.sendRedirect("Home.jsp");	
 		}
 	
 	%>
