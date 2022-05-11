@@ -1,0 +1,254 @@
+@charset "UTF-8";
+
+
+body{
+    background-color: white;
+    font-family:Arial;
+}
+
+h1,h2,h3{
+    color:#7B435B;
+	text-align: center;
+}
+
+#con{
+	width: 500px;
+	height: 200px;
+	padding:10px 10px 10px 10px;
+	/* Center the box */
+	margin: auto;
+	
+	
+}
+
+#con1 {
+	
+	width: 500px;
+	height: 100px;
+	padding:10px 10px 10px 10px;
+	/* Center the box */
+	margin: 0 auto;
+	
+}
+
+#con2 {
+	
+	width: 500px;
+	height: 50px;
+	padding:10px 10px 10px 10px;
+	/* Center the box */
+	margin: 0 auto;
+	
+}
+
+h4{
+    color:#7B435B;
+    font-size:30px;
+	
+}
+.container{
+	background-color:#BCF8EC;
+	width: 500px;
+	height: 600px;
+	padding:10px 10px 10px 10px;
+	/* Center the box */
+	margin: 0 auto;
+  	box-shadow: 0 3px 10px rgb(0 0 0 / 0.2);
+
+	
+	animation-name: slideFromLeft;
+	animation-duration: 1s;	
+
+}
+
+
+.container2{
+	background-color:#BCF8EC;
+	width: 520px;
+	height: 600px;
+	padding:10px 10px 10px 10px;
+	/* Center the box */
+	margin: 0 auto;
+  	box-shadow: 0 3px 10px rgb(0 0 0 / 0.2);
+
+	
+	animation-name: slideFromLeft;
+	animation-duration: 1s;	
+
+}
+
+.container3{
+	background-color:#BCF8EC;
+	width: 500px;
+	height: 225px;
+	padding:10px 10px 10px 10px;
+	/* Center the box */
+	margin: 0 auto;
+  	box-shadow: 0 3px 10px rgb(0 0 0 / 0.2);
+
+	
+	animation-name: slideFromLeft;
+	animation-duration: 1s;	
+
+}
+
+.container4{
+	background-color:#BCF8EC;
+	width: 500px;
+	height: 400px;
+	padding:10px 10px 10px 10px;
+	/* Center the box */
+	margin: 0 auto;
+  	box-shadow: 0 3px 10px rgb(0 0 0 / 0.2);
+
+	
+	animation-name: slideFromLeft;
+	animation-duration: 1s;	
+}
+
+.container5{
+	background-color:#BCF8EC;
+	width: 500px;
+	height: 300px;
+	padding:10px 10px 10px 10px;
+	/* Center the box */
+	margin: 0 auto;
+  	box-shadow: 0 3px 10px rgb(0 0 0 / 0.2);
+
+	
+	animation-name: slideFromLeft;
+	animation-duration: 1s;	
+}
+
+.container6{
+	background-color:#BCF8EC;
+	width: 500px;
+	height: 150px;
+	padding:10px 10px 10px 10px;
+	/* Center the box */
+	margin: 0 auto;
+  	box-shadow: 0 3px 10px rgb(0 0 0 / 0.2);
+
+	
+	animation-name: slideFromLeft;
+	animation-duration: 1s;	
+}
+
+
+ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background-color: #333;
+}
+
+li {
+  float: left;
+}
+
+li a {
+  display: block;
+  color: white;
+  text-align: center;
+  padding: 14px 16px;
+  text-decoration: none;
+}
+
+li a:hover {
+  background-color: #111;
+}
+
+li a:firstChild{
+	color: #7B435B;
+}
+
+
+
+
+
+
+li.menu-item{
+	margin: 0 0 10px 0;	
+	
+}
+
+
+
+h1{
+	animation-name: slideFromTop;
+	animation-duration: 1s;
+}
+
+@keyframes slideFromLeft{
+	
+  0% { transform: translateX(-900px);}
+  100% {transform: translateX(0);}
+	
+}
+
+@keyframes slideFromRight{
+	
+  0% { transform: translateX(900px);}
+  100% {transform: translateX(0);}	
+	
+}
+
+@keyframes slideFromTop{
+  0% { transform: translateY(-100px);}
+  100% {transform: translateY(0);}		
+}
+
+table{
+	text-align:center;
+    border-collapse: collapse;
+    margin: 25px 0;
+    font-size: 0.9em;
+    font-family: sans-serif;
+    min-width: 400px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);	
+	animation-name: slideFromLeft;
+	animation-duration: 1s;		
+}
+
+.center{
+  margin-left: auto;
+  margin-right: auto;
+}
+
+thead tr {
+    background-color: #009879;
+    color: #ffffff;
+    text-align: left;
+}
+
+th,td {
+    padding: 12px 15px;
+}
+
+tbody tr {
+    border-bottom: 1px solid #dddddd;
+}
+
+tbody tr:nth-of-type(even) {
+    background-color: #f3f3f3;
+    
+}
+
+tbody tr:last-of-type {
+    border-bottom: 2px solid #7B435B;
+}
+
+input[type="submit"]{
+ padding: 10px;
+ font-size: 12px;
+ text-transform: uppercase;
+ font-weight: 500;
+ font:#7B435B;
+ color: #000;
+ background-color: #fff;
+ border-radius: 10px #7B435B;
+ cursor: pointer;
+ outline: #7B435B;
+ margin: 0 auto;
+}
